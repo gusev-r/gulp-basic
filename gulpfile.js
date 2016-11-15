@@ -7,14 +7,26 @@ var sourcemaps = require('gulp-sourcemaps');
 var browserSync = require('browser-sync');
 var runSequence = require('run-sequence');
 var rename = require("gulp-rename");
+var imagemin = require('gulp-imagemin');
+var cache = require('gulp-cache');
 
 // synchronize with browser
 gulp.task('browserSync', function() {
 	browserSync({
 		server: {
-			baseDir: 'app'
+			baseDir: 'dist'
 		},
 	});
+});
+
+// optimization image
+gulp.task('images', function(){
+  return gulp.src('app/img/**/*.+(png|jpg|jpeg|gif|svg)')
+  // кэширование изображений, прошедших через imagemin
+  .pipe(cache(imagemin({
+      interlaced: true
+    })))
+  .pipe(gulp.dest('dist/img'))
 });
 
 // compile less
@@ -25,7 +37,7 @@ gulp.task('less', function(){
         .pipe(cleanCSS())
         .pipe(sourcemaps.write())
 		.pipe(rename('main.min.css'))
-        .pipe(gulp.dest('./app/css'))
+        .pipe(gulp.dest('./dist/css'))
 		.pipe(browserSync.reload({stream: true}));
 });
 
