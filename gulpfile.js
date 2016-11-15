@@ -9,6 +9,18 @@ var runSequence = require('run-sequence');
 var rename = require("gulp-rename");
 var imagemin = require('gulp-imagemin');
 var cache = require('gulp-cache');
+var del = require('del');
+
+// clean distribution directories: ALL
+gulp.task('clean', function() {
+  return del.sync('dist').then(function(cb) {
+    return cache.clearAll(cb);
+  });
+})
+// clean distribution directories: except dist/images
+gulp.task('clean:dist', function(callback){
+  del(['dist/**/*', '!dist/images', '!dist/images/**/*'], callback)
+});
 
 // synchronize with browser
 gulp.task('browserSync', function() {
@@ -49,9 +61,19 @@ gulp.task('watch', function(){
 	gulp.watch('app/*.html', browserSync.reload);
 });
 
-
+// Build 
+// ---------------
 gulp.task('default', function(callback) {
   runSequence(['less', 'browserSync'], 'watch',
     callback
   )
 });
+
+gulp.task('build', function(callback) {
+  runSequence(
+    'clean:dist',
+    'less',
+    ['images'],
+    callback
+  )
+})
