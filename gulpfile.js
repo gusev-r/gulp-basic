@@ -12,15 +12,16 @@ var cache = require('gulp-cache');
 var del = require('del');
 
 // clean distribution directories: ALL
-gulp.task('clean', function() {
-  return del.sync('dist').then(function(cb) {
-    return cache.clearAll(cb);
-  });
-})
-// clean distribution directories: except dist/images
-gulp.task('clean:dist', function(callback){
-  del(['dist/**/*', '!dist/images', '!dist/images/**/*'], callback)
+gulp.task('clean', function(callback) {
+  del('dist');
+  return cache.clearAll(callback);
 });
+
+// clean distribution directories: except dist/images
+gulp.task('clean:dist', function() {
+  return del.sync(['dist/**/*', '!dist/images', '!dist/images/**/*']);
+});
+
 
 // synchronize with browser
 gulp.task('browserSync', function() {
@@ -31,19 +32,31 @@ gulp.task('browserSync', function() {
 	});
 });
 
+// Optimizing CSS and JavaScript 
+gulp.task('useref', function() {
+  return gulp.src('app/*.html')
+//    .pipe(useref())
+//    .pipe(gulpIf('*.js', uglify()))
+//    .pipe(gulpIf('*.css', cssnano()))
+    .pipe(gulp.dest('dist'))
+    .pipe(browserSync.reload({ // Reloading with Browser Sync
+      stream: true
+    }));
+});
+
 // optimization image
 gulp.task('images', function(){
-  return gulp.src('app/img/**/*.+(png|jpg|jpeg|gif|svg)')
+  return gulp.src('./app/img/**/*.+(png|jpg|jpeg|gif|svg)')
   // кэширование изображений, прошедших через imagemin
   .pipe(cache(imagemin({
       interlaced: true
     })))
-  .pipe(gulp.dest('dist/img'))
+  .pipe(gulp.dest('dist/img'));
 });
 
 // compile less
 gulp.task('less', function(){
-    gulp.src('./less/incLess.less')
+    gulp.src('./app/less/incLess.less')
         .pipe(sourcemaps.init())
         .pipe(less())
         .pipe(cleanCSS())
@@ -55,16 +68,14 @@ gulp.task('less', function(){
 
 // default watcher
 gulp.task('watch', function(){
-    gulp.watch("./less/*.less", ['browserSync', 'less'], function(event){
-        gulp.run('less');
-    });
-	gulp.watch('app/*.html', browserSync.reload);
+    gulp.watch("./app/less/*.less", ['browserSync', 'less']);
+	gulp.watch('app/*.html', ['useref']);
 });
 
 // Build 
 // ---------------
 gulp.task('default', function(callback) {
-  runSequence(['less', 'browserSync'], 'watch',
+  runSequence('build',['browserSync'], 'watch',
     callback
   )
 });
@@ -73,7 +84,7 @@ gulp.task('build', function(callback) {
   runSequence(
     'clean:dist',
     'less',
-    ['images'],
+    ['useref', 'images'],
     callback
   )
 })
