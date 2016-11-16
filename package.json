@@ -9,6 +9,7 @@
     "browser-sync": "^2.17.6",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
     "gulp-cache": "^0.4.5",
     "gulp-clean-css": "^2.0.13",
     "gulp-concat": "^2.6.0",

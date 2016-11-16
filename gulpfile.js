@@ -10,6 +10,7 @@ var rename = require("gulp-rename");
 var imagemin = require('gulp-imagemin');
 var cache = require('gulp-cache');
 var del = require('del');
+var autoprefixer = require('gulp-autoprefixer');
 
 // clean distribution directories: ALL
 gulp.task('clean', function(callback) {
@@ -59,6 +60,10 @@ gulp.task('less', function(){
     gulp.src('./app/less/incLess.less')
         .pipe(sourcemaps.init())
         .pipe(less())
+		.pipe(autoprefixer({
+            browsers: ['last 2 versions'],
+            cascade: false
+        }))
         .pipe(cleanCSS())
         .pipe(sourcemaps.write())
 		.pipe(rename('main.min.css'))
